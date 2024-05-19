@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "877452927929",
+    "project_id": "youhealth-5740f",
+    "storage_bucket": "youhealth-5740f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877452927929:android:d5214f16c5b9b4edb7cc68",
+        "android_client_info": {
+          "package_name": "com.example.youhealth"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPBaA4MkBEJ2AW21Jp01x0JD1e5mDzWXQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
