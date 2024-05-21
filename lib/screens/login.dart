@@ -1,6 +1,5 @@
-
-import 'package:firebase_auth_rest/firebase_auth_rest.dart';
 import 'package:flutter/material.dart';
+import 'package:youhealth/screens/register.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -10,27 +9,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void signIn() async {
-    try {
-      final auth = FirebaseAuth(
-        apiKey: 'your-api-key', // Reemplaza esto con tu clave de API de Firebase
-        authDomain: 'your-auth-domain', // Reemplaza esto con tu dominio de autenticación de Firebase
-      );
-      final response = await auth.signInWithPassword(
-        emailController.text,
-        passwordController.text,
-      );
-      // Usuario autenticado con éxito
-    } on Exception catch (e) {
-      print('An error occurred: $e');
-    }
+  void signIn() {
+    // Aquí va tu lógica para iniciar sesión
   }
 
   @override
@@ -42,24 +23,36 @@ class _LoginPageState extends State<LoginPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextField(
               controller: emailController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Correo electrónico',
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 16.0),
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Contraseña',
               ),
               obscureText: true,
             ),
+            const SizedBox(height: 16.0),
             ElevatedButton(
-              child: Text('Iniciar sesión'),
               onPressed: signIn,
+              child: const Text('Iniciar sesión'),
+            ),
+            const SizedBox(height: 16.0),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterPage()),
+                );
+              },
+              child: Text('Registrarse'),
             ),
           ],
         ),
