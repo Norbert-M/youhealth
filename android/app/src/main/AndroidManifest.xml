@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-sdk xmlns:tools="http://schemas.android.com/tools" tools:overrideLibrary="com.google.firebase, com.google.firebase.components"/>
     <application
         android:label="youhealth"
         android:name="${applicationName}"
