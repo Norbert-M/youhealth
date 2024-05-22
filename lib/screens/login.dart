@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:youhealth/screens/register.dart';
+import 'dashboard.dart'; // Asegúrate de importar el archivo correcto
 
 class LoginPage extends StatefulWidget {
   @override
@@ -7,18 +9,40 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void signIn() {
-    // Aquí va tu lógica para iniciar sesión
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void signIn() async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      print('Usuario autenticado: ${userCredential.user!.email}');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Dashboard()),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Iniciar sesión'),
+        title: const Text('Iniciar sesión'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -52,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
                   MaterialPageRoute(builder: (context) => RegisterPage()),
                 );
               },
-              child: Text('Registrarse'),
+              child: const Text('Registrarse'),
             ),
           ],
         ),

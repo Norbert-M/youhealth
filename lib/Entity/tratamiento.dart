@@ -43,6 +43,6 @@ class Tratamiento {
 
   @override
   String toString() {
-    return 'Tratamiento{idTratamiento: $idTratamiento, idMedicamento: $idMedicamento}';
+    return 'Tratamiento{ idMedicamento: $idMedicamento}';
   }
 }
