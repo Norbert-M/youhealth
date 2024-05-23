@@ -11,12 +11,15 @@ dependencies:
     sdk: flutter
   firebase_core: ^2.28.0
   cloud_firestore: ^4.16.0
-  firebase_auth_rest: ^2.0.4
   firebase_messaging: ^14.9.2
   firebase_auth: ^4.19.6
   intl: ^0.19.0
   flutter_local_notifications: ^17.1.2
   shared_preferences: ^2.2.3
+  google_maps_flutter: ^2.6.1
+  geocoding: ^3.0.0
+  google_maps_webservice: ^0.0.20-nullsafety.5
+  flutter_google_places: ^0.3.0
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +28,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/assets/

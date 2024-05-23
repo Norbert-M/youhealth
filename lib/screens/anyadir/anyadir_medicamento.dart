@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:youhealth/Entity/medicamento.dart';
+import 'package:youhealth/assets/colors.dart';
 
 class AnadirMedicamentoPage extends StatefulWidget {
   @override
@@ -18,16 +19,28 @@ class _AnadirMedicamentoPageState extends State<AnadirMedicamentoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Añadir Medicamento'),
+        backgroundColor: AppColors.barColor,
+        title: const Text('Añadir Medicamento',
+          style: TextStyle(color: Colors.white),
+        )
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           children: <Widget>[
             TextFormField(
               controller: _nombreController,
-              decoration: InputDecoration(labelText: 'Nombre'),
+              decoration: const InputDecoration(
+                labelText: 'Nombre',
+                labelStyle: TextStyle(color: Colors.grey),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.barColor, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese un nombre';
@@ -35,9 +48,19 @@ class _AnadirMedicamentoPageState extends State<AnadirMedicamentoPage> {
                 return null;
               },
             ),
+            const SizedBox(height: 20.0),
             TextFormField(
               controller: _cantidadStockController,
-              decoration: InputDecoration(labelText: 'Cantidad en Stock'),
+              decoration: const InputDecoration(
+                labelText: 'Cantidad en Stock',
+                labelStyle: TextStyle(color: Colors.grey),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.barColor, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+              ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -46,9 +69,19 @@ class _AnadirMedicamentoPageState extends State<AnadirMedicamentoPage> {
                 return null;
               },
             ),
+            const SizedBox(height: 20.0),
             TextFormField(
               controller: _dosisController,
-              decoration: InputDecoration(labelText: 'Dosis (ml o mg)'),
+              decoration: const InputDecoration(
+                labelText: 'Dosis (ml o mg)',
+                labelStyle: TextStyle(color: Colors.grey),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.barColor, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese la dosis';
@@ -56,22 +89,30 @@ class _AnadirMedicamentoPageState extends State<AnadirMedicamentoPage> {
                 return null;
               },
             ),
-            ElevatedButton(
-              child: Text('Añadir Medicamento'),
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  // Aquí puedes añadir el medicamento a la base de datos
-                  // Por ejemplo, puedes añadirlo a Firestore
-                  final medicamento = Medicamento(
-                    idMedicamento: FirebaseFirestore.instance.collection('medicamentos').doc().id,
-                    nombre: _nombreController.text,
-                    cantidadStock: int.parse(_cantidadStockController.text),
-                    dosis: _dosisController.text,
-                  );
-                  await FirebaseFirestore.instance.collection('medicamentos').doc(medicamento.idMedicamento).set(medicamento.toJson());
-                  Navigator.pop(context);
-                }
-              },
+            const SizedBox(height: 20.0),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.barColor,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                ),
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    final medicamento = Medicamento(
+                      idMedicamento: FirebaseFirestore.instance.collection('medicamentos').doc().id,
+                      nombre: _nombreController.text,
+                      cantidadStock: int.parse(_cantidadStockController.text),
+                      dosis: _dosisController.text,
+                    );
+                    await FirebaseFirestore.instance.collection('medicamentos').doc(medicamento.idMedicamento).set(medicamento.toJson());
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Añadir Medicamento', style: TextStyle(color: Colors.white)),
+              ),
             ),
           ],
         ),

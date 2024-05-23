@@ -13,7 +13,7 @@ class NotificationService {
   void _initializeNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@drawable/app_icon');
-    final InitializationSettings initializationSettings = const InitializationSettings(
+    const InitializationSettings initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);

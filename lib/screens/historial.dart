@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:youhealth/Widgets/widget_medicamento,dart';
+
 
 class HistorialPage extends StatefulWidget {
   @override
@@ -45,26 +47,27 @@ class _HistorialPageState extends State<HistorialPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 217, 217, 217),
         title: Text('Historial de Medicamentos'),
       ),
-      body: FutureBuilder<List<DocumentSnapshot>>(
-        future: futureMedicamentos,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView(
-              children: snapshot.data!.map((doc) {
-                Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                return ListTile(
-                  title: Text('Medicamento: ${data['nombre']}'),
-                  subtitle: Text('Dosis: ${data['dosis']}'),
-                );
-              }).toList(),
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
-          return CircularProgressIndicator();
-        },
+      body: Container(
+        color: Color.fromARGB(255, 217, 217, 217),
+        child: FutureBuilder<List<DocumentSnapshot>>(
+          future: futureMedicamentos,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ListView(
+                children: snapshot.data!.map((doc) {
+                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                  return MedicamentoHistorialItem(data: data) as Widget;
+                }).toList(),
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            return CircularProgressIndicator();
+          },
+        ),
       ),
     );
   }

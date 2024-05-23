@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:youhealth/assets/colors.dart';
 
 class TarjetaEvento extends StatelessWidget {
   final String titulo;
@@ -10,6 +11,7 @@ class TarjetaEvento extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: AppColors.backgroundWidgetColor, // Cambiar el color de fondo aquí
       margin: EdgeInsets.all(10),
       elevation: 5,
       child: Padding(
@@ -19,17 +21,17 @@ class TarjetaEvento extends StatelessWidget {
           children: [
             Text(
               titulo,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textWidgetColor), // Cambiar el color del texto aquí
             ),
             SizedBox(height: 10),
             Text(
               subtitulo,
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, color: AppColors.textWidgetColor), // Cambiar el color del texto aquí
             ),
             SizedBox(height: 10),
             Text(
               siguiente,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(fontSize: 16, color: AppColors.textWidgetColor), // Cambiar el color del texto aquí
             ),
           ],
         ),

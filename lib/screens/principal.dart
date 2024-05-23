@@ -1,35 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
-import 'package:youhealth/Widgets/widget_evento.dart';
 import 'package:youhealth/assets/colors.dart';
+import 'package:youhealth/screens/mostrar/mostrar_citas.dart';
+import 'package:youhealth/screens/mostrar/mostrar_tratamientos.dart';
 
-class TreatmentListPage extends StatefulWidget {
+class PrincipalPage extends StatefulWidget {
   @override
   _TreatmentListPageState createState() => _TreatmentListPageState();
 }
 
-class _TreatmentListPageState extends State<TreatmentListPage> {
+class _TreatmentListPageState extends State<PrincipalPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  late Stream<QuerySnapshot> treatmentsStream;
-
-  Future<String> getMedicamentoName(String idMedicamento) async {
-    DocumentSnapshot medicamentoSnapshot = await FirebaseFirestore.instance
-        .collection('medicamentos')
-        .doc(idMedicamento)
-        .get();
-    return (medicamentoSnapshot.data() as Map<String, dynamic>)['nombre'] ?? '';
-  }
-
-  Future<String> getUserId(String idTratamiento) async {
-    DocumentSnapshot tratamientoSnapshot = await FirebaseFirestore.instance
-        .collection('tratamientos')
-        .doc(idTratamiento)
-        .get();
-    return (tratamientoSnapshot.data() as Map<String, dynamic>)['idUser'] ?? '';
-  }
 
   Future<String> getUserName(String idUser) async {
     DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
@@ -40,16 +23,11 @@ class _TreatmentListPageState extends State<TreatmentListPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    treatmentsStream = _db.collection('ProximosTratamientos').snapshots();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor, // Cambiar el color del AppBar aquí
+        backgroundColor: Color.fromARGB(255, 217, 217, 217),
         title: FutureBuilder<String>(
           future: getUserName(_auth.currentUser!.uid),
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -64,63 +42,53 @@ class _TreatmentListPageState extends State<TreatmentListPage> {
           },
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: treatmentsStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Container(
-              color: AppColors.backgroundColor, // Usar backgroundColor aquí
-              child: FutureBuilder<List<Map<String, dynamic>?>>(
-                future: Future.wait(snapshot.data!.docs.map((doc) async {
-                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                  String userId = await getUserId(data['idTratamiento']);
-                  if (userId == _auth.currentUser!.uid) {
-                    DateTime nextDose =
-                        DateTime.fromMillisecondsSinceEpoch(data['hora']);
-                    DateTime now = DateTime.now();
-                    // Comprueba si la próxima dosis es hoy
-                    if (nextDose.day == now.day &&
-                        nextDose.month == now.month &&
-                        nextDose.year == now.year) {
-                      String medicamentoName = data[
-                          'nombreMedicamento']; // Accede directamente al nombre del medicamento
-                      return {
-                        'title': medicamentoName,
-                        'subtitle': 'Dosis: ${data['dosis']}',
-                        'trailing': 'Siguiente dosis: ${nextDose.hour}:${nextDose.minute}',
-                        'nextDose': nextDose, // Añade nextDose a los datos
-                      };
-                    }
-                  }
-                  return null;
-                })),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    List<Map<String, dynamic>?> data = snapshot.data!;
-                    List<Map<String, dynamic>> nonNullData = data.where((item) => item != null).toList().cast<Map<String, dynamic>>();
-                    nonNullData.sort((a, b) => (a['nextDose'] as DateTime).compareTo(b['nextDose'] as DateTime)); // Sort by next dose
-                    List<Widget> widgets = nonNullData.map((item) {
-                      return TarjetaEvento(
-                        titulo: item['title'] as String,
-                        subtitulo: item['subtitle'] as String,
-                        siguiente: item['trailing'] as String,
-                      );
-                    }).toList();
-                    return ListView(
-                      children: widgets,
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
-                  return CircularProgressIndicator();
-                },
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              width: 200, // Ancho de la imagen
+              height: 200, // Altura de la imagen
+              child: Image.asset('lib/assets/app_icon.png', fit: BoxFit.cover),
+            ), // Asegúrate de reemplazar 'your_image.png' con la ruta de tu imagen
+            const SizedBox(height: 50),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: AppColors.barColor, // color del texto
+                minimumSize: const Size(200, 50), // tamaño del botón
               ),
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
-          return CircularProgressIndicator();
-        },
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MostrarCitasPage()),
+                );
+              },
+              child: const Text(
+                'Mostrar Citas',
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+            const SizedBox(height: 20), // Espacio entre los botones
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: AppColors.barColor, // color del texto
+                minimumSize: const Size(200, 50), // tamaño del botón
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TreatmentListPage()),
+                );
+              },
+              child: const Text(
+                'Mostrar Tratamientos',
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

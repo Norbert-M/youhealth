@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:youhealth/Entity/cita_medico.dart';
+import 'package:youhealth/assets/colors.dart';
+import 'package:youhealth/screens/anyadir/anyadir_cita.dart';
+import 'package:youhealth/screens/anyadir/anyadir_hospital.dart';
 import 'package:youhealth/screens/anyadir/anyadir_medicamento.dart';
 import 'package:youhealth/screens/anyadir/anyadir_tratamiento.dart';
 
@@ -7,44 +11,74 @@ class AnadirPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Añadir'),
+        backgroundColor: AppColors.barColor,
+        title: const Text('Añadir',
+          style: TextStyle(color: Colors.white),
+        )
       ),
-      body: ListView(
-        children: <Widget>[
-          ListTile(
-            leading: Icon(Icons.calendar_today),
-            title: Text('Añadir Cita'),
-            onTap: () {
-              // Aquí puedes manejar el evento de clic en 'Añadir Cita'
-              // Por ejemplo, puedes navegar a la pantalla de añadir cita
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => AnadirCitaPage()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.healing),
-            title: Text('Añadir Tratamiento'),
-            onTap: () {
-              // Aquí puedes manejar el evento de clic en 'Añadir Tratamiento'
-              // Por ejemplo, puedes navegar a la pantalla de añadir tratamiento
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => AnadirTratamientoPage()));
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AnadirTratamientoPage()),
-          );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.medical_services),
-            title: Text('Añadir Medicamento'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AnadirMedicamentoPage()),
-          );
-            },
-          ),
-        ],
+      body: Container(
+        color: Color.fromARGB(255, 217, 217, 217),
+        child: ListView(
+          padding: const EdgeInsets.all(8.0),
+          children: <Widget>[
+            Card(
+              elevation: 4.0,
+              margin: const EdgeInsets.only(bottom: 16.0),
+              child: ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Añadir Cita'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AnadirCitaPage()),
+                  );
+                },
+              ),
+            ),
+            Card(
+              elevation: 4.0,
+              margin: const EdgeInsets.only(bottom: 16.0),
+              child: ListTile(
+                leading: const Icon(Icons.healing),
+                title: const Text('Añadir Tratamiento'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AnadirTratamientoPage()),
+                  );
+                },
+              ),
+            ),
+            Card(
+              elevation: 4.0,
+              margin: const EdgeInsets.only(bottom: 16.0),
+              child: ListTile(
+                leading: const Icon(Icons.medical_services),
+                title: const Text('Añadir Medicamento'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AnadirMedicamentoPage()),
+                  );
+                },
+              ),
+            ),
+            Card(
+              elevation: 4.0,
+              margin: const EdgeInsets.only(bottom: 16.0),
+              child: ListTile(
+                leading: const Icon(Icons.local_hospital),
+                title: const Text('Añadir Hospital'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AnadirHospitalPage()),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

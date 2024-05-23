@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:youhealth/assets/colors.dart';
 
 class AnadirTratamientoPage extends StatefulWidget {
   @override
@@ -57,6 +59,37 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
     return (medicamentoSnapshot.data() as Map<String, dynamic>)['nombre'] ?? '';
   }
 
+  Future<void> addTratamiento() async {
+    if (_formKey.currentState!.validate()) {
+      final tratamiento = {
+        'idTratamiento': FirebaseFirestore.instance.collection('tratamientos').doc().id,
+        'idMedicamento': _medicamentoId!,
+        'idUser': FirebaseAuth.instance.currentUser!.uid,
+        'dosis': _dosisController.text,
+        'frecuenciaHoras': int.parse(_horasController.text),
+        'fechaInicio': _fechaInicio!.millisecondsSinceEpoch,
+        'fechaFin': _fechaFin!.millisecondsSinceEpoch,
+      };
+      await FirebaseFirestore.instance.collection('tratamientos').doc(tratamiento['idTratamiento'] as String?).set(tratamiento);
+  
+      List<DateTime> futureDoseTimes = getFutureDoseTimes(_fechaInicio!, _fechaFin!, tratamiento['frecuenciaHoras'] as int);
+      for (DateTime doseTime in futureDoseTimes) {
+        String idMedicamento = tratamiento['idMedicamento'] as String;
+        String medicamentoName = await getMedicamentoName(idMedicamento);
+        final proximoTratamiento = {
+          'idTratamiento': tratamiento['idTratamiento'],
+          'hora': doseTime.millisecondsSinceEpoch,
+          'nombreMedicamento': medicamentoName,
+          'idUser': _auth.currentUser!.uid,
+          'dosis': tratamiento['dosis'],
+        };
+        await FirebaseFirestore.instance.collection('ProximosTratamientos').add(proximoTratamiento);
+      }
+  
+      Navigator.pop(context);
+    }
+  }
+
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -88,13 +121,17 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Añadir Tratamiento'),
+        backgroundColor: AppColors.barColor,
+        title: const Text('Añadir Tratamiento',
+          style: TextStyle(color: CupertinoColors.white),
+        )
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           children: <Widget>[
+            const SizedBox(height: 20.0),
             DropdownButtonFormField<String>(
               value: _medicamentoId,
               items: _medicamentoItems,
@@ -103,7 +140,16 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
                   _medicamentoId = value;
                 });
               },
-              decoration: InputDecoration(labelText: 'Medicamento'),
+              decoration: const InputDecoration(
+                labelText: 'Medicamento',
+                labelStyle: TextStyle(color: Colors.grey),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.barColor, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor seleccione un medicamento';
@@ -111,9 +157,19 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
                 return null;
               },
             ),
+            const SizedBox(height: 20.0),
             TextFormField(
               controller: _dosisController,
-              decoration: InputDecoration(labelText: 'Dosis (por ejemplo, 1 pastilla)'),
+              decoration: const InputDecoration(
+                labelText: 'Dosis (por ejemplo, 1 pastilla)',
+                labelStyle: TextStyle(color: Colors.grey),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.barColor, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese la dosis';
@@ -121,9 +177,19 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
                 return null;
               },
             ),
+            const SizedBox(height: 20.0),
             TextFormField(
               controller: _horasController,
-              decoration: InputDecoration(labelText: 'Cada cuantas horas'),
+              decoration: const InputDecoration(
+                labelText: 'Cada cuantas horas',
+                labelStyle: TextStyle(color: Colors.grey),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.barColor, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+              ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -133,49 +199,44 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
               },
             ),
             // Agrega los botones para seleccionar las fechas de inicio y final
-            ElevatedButton(
-              onPressed: () => _selectDate(context, true),
-              child: Text('Seleccionar Fecha de Inicio'),
+            const SizedBox(height: 20.0),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.barColor,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: CupertinoButton(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                onPressed: () => _selectDate(context, true),
+                child: const Text('Seleccionar Fecha de Inicio', style: TextStyle(color: CupertinoColors.white)),
+              ),
             ),
-            ElevatedButton(
-              onPressed: () => _selectDate(context, false),
-              child: Text('Seleccionar Fecha Final'),
+            
+            const SizedBox(height: 20.0), // Añade separación
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.barColor,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: CupertinoButton(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                onPressed: () => _selectDate(context, false),
+                child: const Text('Seleccionar Fecha Final', style: TextStyle(color: CupertinoColors.white)),
+              ),
             ),
-            ElevatedButton(
-              child: Text('Añadir Tratamiento'),
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  // Aquí puedes añadir el tratamiento a la base de datos
-                  // Por ejemplo, puedes añadirlo a Firestore
-                  final tratamiento = {
-                    'idTratamiento': FirebaseFirestore.instance.collection('tratamientos').doc().id,
-                    'idMedicamento': _medicamentoId!,
-                    'idUser': FirebaseAuth.instance.currentUser!.uid,
-                    'dosis': _dosisController.text,
-                    'frecuenciaHoras': int.parse(_horasController.text),
-                    'fechaInicio': _fechaInicio!.millisecondsSinceEpoch, // Guarda la fecha como un timestamp
-                    'fechaFin': _fechaFin!.millisecondsSinceEpoch, // Guarda la fecha como un timestamp
-                  };
-                  await FirebaseFirestore.instance.collection('tratamientos').doc(tratamiento['idTratamiento'] as String?).set(tratamiento);
-            
-                  // Calcula las horas de dosificación futuras y crea los registros en ProximosTratamientos
-                  List<DateTime> futureDoseTimes = getFutureDoseTimes(_fechaInicio!, _fechaFin!, tratamiento['frecuenciaHoras'] as int);
-                  for (DateTime doseTime in futureDoseTimes) {
-                    String idMedicamento = tratamiento['idMedicamento'] as String;
-                    String medicamentoName = await getMedicamentoName(idMedicamento);
-                    final proximoTratamiento = {
-                      'idTratamiento': tratamiento['idTratamiento'],
-                      'hora': doseTime.millisecondsSinceEpoch, // Guarda la hora como un timestamp
-                      'nombreMedicamento': medicamentoName, // Usa el nombre del medicamento obtenido
-                      'idUser': _auth.currentUser!.uid, // Añade el id del usuario
-                      'dosis': tratamiento['dosis'],
-                    };
-                    await FirebaseFirestore.instance.collection('ProximosTratamientos').add(proximoTratamiento);
-                  }
-            
-                  Navigator.pop(context);
-                }
-              },
+            const SizedBox(height: 20.0), // Añade separación
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.barColor,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: CupertinoButton(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                onPressed: () async {
+                  await addTratamiento();
+                },
+                child: const Text('Añadir Tratamiento', style: TextStyle(color: CupertinoColors.white)),
+              ),
             ),
           ],
         ),

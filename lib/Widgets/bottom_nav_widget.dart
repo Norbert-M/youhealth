@@ -13,9 +13,9 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
   int _selectedIndex = 0;
 
   static List<Widget> _widgetOptions = <Widget>[
-    TreatmentListPage(),
+    PrincipalPage(),
     HistorialPage(),
-    Text('Configuración'),
+    const Text('Configuración'),
 
   ];
 
