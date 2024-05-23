@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:youhealth/assets/colors.dart';
 import 'package:youhealth/screens/historial.dart';
 import 'package:youhealth/screens/principal.dart';
  // Asegúrate de importar el archivo correcto
@@ -31,22 +32,24 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: AppColors.barColor, // Cambiar el color de fondo aquí
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home, color: Colors.white), // Cambiar el color del ícono aquí
             label: 'Principal',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services),
+            icon: Icon(Icons.medical_services, color: Colors.white), // Cambiar el color del ícono aquí
             label: 'Historial',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.settings, color: Colors.white), // Cambiar el color del ícono aquí
             label: 'Configuración',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
+        unselectedItemColor: Color.fromARGB(255, 180, 180, 180), // Cambiar el color del ícono no seleccionado aquí
         onTap: _onItemTapped,
       ),
     );

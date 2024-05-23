@@ -22,4 +22,9 @@ class AuthService {
       return null;
     }
   }
+
+  // Método para verificar si el usuario está actualmente conectado
+  User? obtenerUsuarioActual() {
+    return _auth.currentUser;
+  }
 }

@@ -3,18 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
-
 class AnadirTratamientoPage extends StatefulWidget {
   @override
   _AnadirTratamientoPageState createState() => _AnadirTratamientoPageState();
 }
 
 class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
   final _dosisController = TextEditingController();
   final _horasController = TextEditingController();
-  final _fechaInicioController = TextEditingController();
-  final _fechaFinController = TextEditingController();
   String? _medicamentoId;
   List<DropdownMenuItem<String>> _medicamentoItems = [];
   DateTime? _fechaInicio;
@@ -36,6 +34,54 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
         );
       }).toList();
     });
+  }
+
+  List<DateTime> getFutureDoseTimes(DateTime startTime, DateTime endTime, int frequencyHours) {
+    List<DateTime> times = [];
+    DateTime nextTime = startTime.add(Duration(hours: 2+frequencyHours)); // Añade 8 horas al inicio
+    while (nextTime.isBefore(endTime) || nextTime.isAtSameMomentAs(endTime)) {
+      times.add(nextTime);
+      nextTime = nextTime.add(Duration(hours: frequencyHours));
+    }
+    // Asegurarse de que el último registro, que es igual a la hora final, también se añada
+    if (nextTime.isAtSameMomentAs(endTime)) {
+      times.add(nextTime);
+    }
+    return times;
+  }
+  Future<String> getMedicamentoName(String idMedicamento) async {
+    DocumentSnapshot medicamentoSnapshot = await FirebaseFirestore.instance
+      .collection('medicamentos')
+      .doc(idMedicamento)
+      .get();
+    return (medicamentoSnapshot.data() as Map<String, dynamic>)['nombre'] ?? '';
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2050),
+    );
+    if (picked != null) {
+      DateTime now = DateTime.now();
+      DateTime dateTime = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        now.hour,
+        now.minute,
+        now.second,
+      );
+      setState(() {
+        if (isStartDate) {
+          _fechaInicio = dateTime;
+        } else {
+          _fechaFin = dateTime;
+        }
+      });
+    }
   }
 
   @override
@@ -86,51 +132,14 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
                 return null;
               },
             ),
-            TextFormField(
-              controller: _fechaInicioController,
-              decoration: InputDecoration(labelText: 'Fecha de inicio'),
-              onTap: () async {
-                FocusScope.of(context).requestFocus(new FocusNode()); // para quitar el teclado
-                final fechaSeleccionada = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (fechaSeleccionada != null) {
-                  _fechaInicio = fechaSeleccionada;
-                  _fechaInicioController.text = DateFormat('dd/MM/yyyy').format(_fechaInicio!);
-                }
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor seleccione la fecha de inicio';
-                }
-                return null;
-              },
+            // Agrega los botones para seleccionar las fechas de inicio y final
+            ElevatedButton(
+              onPressed: () => _selectDate(context, true),
+              child: Text('Seleccionar Fecha de Inicio'),
             ),
-            TextFormField(
-              controller: _fechaFinController,
-              decoration: InputDecoration(labelText: 'Fecha de fin'),
-              onTap: () async {
-                FocusScope.of(context).requestFocus(new FocusNode()); // para quitar el teclado
-                final fechaSeleccionada = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (fechaSeleccionada != null) {
-                  _fechaFin = fechaSeleccionada;
-                  _fechaFinController.text = DateFormat('dd/MM/yyyy').format(_fechaFin!);
-                }
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor seleccione la fecha de fin';
-                }
-                return null;
-              },
+            ElevatedButton(
+              onPressed: () => _selectDate(context, false),
+              child: Text('Seleccionar Fecha Final'),
             ),
             ElevatedButton(
               child: Text('Añadir Tratamiento'),
@@ -148,6 +157,22 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
                     'fechaFin': _fechaFin!.millisecondsSinceEpoch, // Guarda la fecha como un timestamp
                   };
                   await FirebaseFirestore.instance.collection('tratamientos').doc(tratamiento['idTratamiento'] as String?).set(tratamiento);
+            
+                  // Calcula las horas de dosificación futuras y crea los registros en ProximosTratamientos
+                  List<DateTime> futureDoseTimes = getFutureDoseTimes(_fechaInicio!, _fechaFin!, tratamiento['frecuenciaHoras'] as int);
+                  for (DateTime doseTime in futureDoseTimes) {
+                    String idMedicamento = tratamiento['idMedicamento'] as String;
+                    String medicamentoName = await getMedicamentoName(idMedicamento);
+                    final proximoTratamiento = {
+                      'idTratamiento': tratamiento['idTratamiento'],
+                      'hora': doseTime.millisecondsSinceEpoch, // Guarda la hora como un timestamp
+                      'nombreMedicamento': medicamentoName, // Usa el nombre del medicamento obtenido
+                      'idUser': _auth.currentUser!.uid, // Añade el id del usuario
+                      'dosis': tratamiento['dosis'],
+                    };
+                    await FirebaseFirestore.instance.collection('ProximosTratamientos').add(proximoTratamiento);
+                  }
+            
                   Navigator.pop(context);
                 }
               },

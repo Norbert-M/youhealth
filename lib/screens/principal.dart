@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:youhealth/Widgets/top_bar_widget.dart';
-
-class Treatment {
-  final String name;
-  final String time;
-
-  Treatment({required this.name, required this.time});
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+import 'package:youhealth/Widgets/widget_evento.dart';
+import 'package:youhealth/assets/colors.dart';
 
 class TreatmentListPage extends StatefulWidget {
   @override
@@ -14,40 +11,110 @@ class TreatmentListPage extends StatefulWidget {
 }
 
 class _TreatmentListPageState extends State<TreatmentListPage> {
-  late Future<List<Treatment>> futureTreatments;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  late Stream<QuerySnapshot> treatmentsStream;
 
-  Future<List<Treatment>> getTreatments() async {
-    // Aquí debes implementar la lógica para obtener los tratamientos del usuario actual
-    // Por ahora, devolveré una lista de tratamientos de ejemplo
-    return [
-      Treatment(name: 'Tratamiento 1', time: '08:00'),
-      Treatment(name: 'Tratamiento 2', time: '12:00'),
-      Treatment(name: 'Tratamiento 3', time: '16:00'),
-      Treatment(name: 'Tratamiento 4', time: '20:00'),
-    ];
+  Future<String> getMedicamentoName(String idMedicamento) async {
+    DocumentSnapshot medicamentoSnapshot = await FirebaseFirestore.instance
+        .collection('medicamentos')
+        .doc(idMedicamento)
+        .get();
+    return (medicamentoSnapshot.data() as Map<String, dynamic>)['nombre'] ?? '';
+  }
+
+  Future<String> getUserId(String idTratamiento) async {
+    DocumentSnapshot tratamientoSnapshot = await FirebaseFirestore.instance
+        .collection('tratamientos')
+        .doc(idTratamiento)
+        .get();
+    return (tratamientoSnapshot.data() as Map<String, dynamic>)['idUser'] ?? '';
+  }
+
+  Future<String> getUserName(String idUser) async {
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(idUser)
+        .get();
+    return (userSnapshot.data() as Map<String, dynamic>)['nombre'] ?? '';
   }
 
   @override
   void initState() {
     super.initState();
-    futureTreatments = getTreatments();
+    treatmentsStream = _db.collection('ProximosTratamientos').snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<Treatment>>(
-        future: futureTreatments,
+      appBar: AppBar(
+        backgroundColor: AppColors.backgroundColor, // Cambiar el color del AppBar aquí
+        title: FutureBuilder<String>(
+          future: getUserName(_auth.currentUser!.uid),
+          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else {
+              if (snapshot.hasError)
+                return Text('Error: ${snapshot.error}');
+              else
+                return Text('Hola, ${snapshot.data}!');
+            }
+          },
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: treatmentsStream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data![index].name),
-                  subtitle: Text(snapshot.data![index].time),
-                );
-              },
+            return Container(
+              color: AppColors.backgroundColor, // Usar backgroundColor aquí
+              child: FutureBuilder<List<Map<String, dynamic>?>>(
+                future: Future.wait(snapshot.data!.docs.map((doc) async {
+                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                  String userId = await getUserId(data['idTratamiento']);
+                  if (userId == _auth.currentUser!.uid) {
+                    DateTime nextDose =
+                        DateTime.fromMillisecondsSinceEpoch(data['hora']);
+                    DateTime now = DateTime.now();
+                    // Comprueba si la próxima dosis es hoy
+                    if (nextDose.day == now.day &&
+                        nextDose.month == now.month &&
+                        nextDose.year == now.year) {
+                      String medicamentoName = data[
+                          'nombreMedicamento']; // Accede directamente al nombre del medicamento
+                      return {
+                        'title': medicamentoName,
+                        'subtitle': 'Dosis: ${data['dosis']}',
+                        'trailing': 'Siguiente dosis: ${nextDose.hour}:${nextDose.minute}',
+                        'nextDose': nextDose, // Añade nextDose a los datos
+                      };
+                    }
+                  }
+                  return null;
+                })),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    List<Map<String, dynamic>?> data = snapshot.data!;
+                    List<Map<String, dynamic>> nonNullData = data.where((item) => item != null).toList().cast<Map<String, dynamic>>();
+                    nonNullData.sort((a, b) => (a['nextDose'] as DateTime).compareTo(b['nextDose'] as DateTime)); // Sort by next dose
+                    List<Widget> widgets = nonNullData.map((item) {
+                      return TarjetaEvento(
+                        titulo: item['title'] as String,
+                        subtitulo: item['subtitle'] as String,
+                        siguiente: item['trailing'] as String,
+                      );
+                    }).toList();
+                    return ListView(
+                      children: widgets,
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  return CircularProgressIndicator();
+                },
+              ),
             );
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');

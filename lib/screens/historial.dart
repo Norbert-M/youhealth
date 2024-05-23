@@ -19,14 +19,18 @@ class _HistorialPageState extends State<HistorialPage> {
         .collection('tratamientos')
         .where('idUser', isEqualTo: userId)
         .get();
+    Set<String> medicamentoIds = {};
     List<DocumentSnapshot> medicamentos = [];
     for (var doc in tratamientosSnapshot.docs) {
       String medicamentoId = doc['idMedicamento'];
-      DocumentSnapshot medicamentoSnapshot = await FirebaseFirestore.instance
-          .collection('medicamentos')
-          .doc(medicamentoId)
-          .get();
-      medicamentos.add(medicamentoSnapshot);
+      if (!medicamentoIds.contains(medicamentoId)) {
+        medicamentoIds.add(medicamentoId);
+        DocumentSnapshot medicamentoSnapshot = await FirebaseFirestore.instance
+            .collection('medicamentos')
+            .doc(medicamentoId)
+            .get();
+        medicamentos.add(medicamentoSnapshot);
+      }
     }
     return medicamentos;
   }

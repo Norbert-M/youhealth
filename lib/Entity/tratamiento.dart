@@ -24,8 +24,8 @@ class Tratamiento {
       idUser: json['idUser'],
       dosis: json['dosis'],
       frecuenciaHoras: json['frecuenciaHoras'],
-      fechaInicio: json['fechaInicio'],
-      fechaFin: json['fechaFin'],
+      fechaInicio: DateTime.parse(json['fechaInicio']),
+      fechaFin: DateTime.parse(json['fechaFin']),
     );
   }
 
@@ -36,8 +36,8 @@ class Tratamiento {
       'idUser': idUser,
       'dosis': dosis,
       'frecuenciaHoras': frecuenciaHoras,
-      'fechaInicio': fechaInicio,
-      'fechaFin': fechaFin,
+      'fechaInicio': fechaInicio.toIso8601String(),
+      'fechaFin': fechaFin.toIso8601String(),
     };
   }
 

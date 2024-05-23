@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:youhealth/screens/dashboard.dart';
+import 'package:youhealth/screens/login.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -42,6 +44,12 @@ class _RegisterPageState extends State<RegisterPage> {
         'estatura': heightController.text,
         'peso': weightController.text,
       });
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+        (Route<dynamic> route) => false,
+      );
 
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
