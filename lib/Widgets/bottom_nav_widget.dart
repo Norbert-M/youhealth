@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youhealth/assets/colors.dart';
 import 'package:youhealth/screens/historial.dart';
+import 'package:youhealth/screens/hospitales.dart';
 import 'package:youhealth/screens/principal.dart';
  // Asegúrate de importar el archivo correcto
 
@@ -12,10 +13,10 @@ class BottomNavWidget extends StatefulWidget {
 class _BottomNavWidgetState extends State<BottomNavWidget> {
   int _selectedIndex = 0;
 
-  static List<Widget> _widgetOptions = <Widget>[
+  static final List<Widget> _widgetOptions = <Widget>[
     PrincipalPage(),
     HistorialPage(),
-    const Text('Configuración'),
+    HospitalesPage(),
 
   ];
 
@@ -35,16 +36,16 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
         backgroundColor: AppColors.barColor, // Cambiar el color de fondo aquí
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: Colors.white), // Cambiar el color del ícono aquí
+            icon: Icon(Icons.home, color: AppColors.backgroundColor), // Cambiar el color del ícono aquí
             label: 'Principal',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services, color: Colors.white), // Cambiar el color del ícono aquí
+            icon: Icon(Icons.medical_services, color: AppColors.backgroundColor), // Cambiar el color del ícono aquí
             label: 'Historial',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings, color: Colors.white), // Cambiar el color del ícono aquí
-            label: 'Configuración',
+            icon: Icon(Icons.local_hospital,  color: AppColors.backgroundColor), // Cambiar el color del ícono aquí
+            label: 'Hospitales',
           ),
         ],
         currentIndex: _selectedIndex,

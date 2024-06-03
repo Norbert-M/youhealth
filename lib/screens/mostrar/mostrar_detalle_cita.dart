@@ -52,7 +52,7 @@ class DetalleCitaPage extends StatelessWidget {
             const SizedBox(height: 10),
             const Text('Ubicación en el mapa:'),
             Container(
-              height: 200, // Ajusta esto para cambiar el tamaño del mapa
+              height: 200, 
               child: GoogleMap(
                 mapType: MapType.hybrid,
                 initialCameraPosition: CameraPosition(

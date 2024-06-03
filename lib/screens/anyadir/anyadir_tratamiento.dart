@@ -40,7 +40,7 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
 
   List<DateTime> getFutureDoseTimes(DateTime startTime, DateTime endTime, int frequencyHours) {
     List<DateTime> times = [];
-    DateTime nextTime = startTime.add(Duration(hours: 2+frequencyHours)); // Añade 8 horas al inicio
+    DateTime nextTime = startTime.add(Duration(hours:frequencyHours)); // Añade 8 horas al inicio
     while (nextTime.isBefore(endTime) || nextTime.isAtSameMomentAs(endTime)) {
       times.add(nextTime);
       nextTime = nextTime.add(Duration(hours: frequencyHours));
@@ -72,9 +72,20 @@ class _AnadirTratamientoPageState extends State<AnadirTratamientoPage> {
       };
       await FirebaseFirestore.instance.collection('tratamientos').doc(tratamiento['idTratamiento'] as String?).set(tratamiento);
   
-      List<DateTime> futureDoseTimes = getFutureDoseTimes(_fechaInicio!, _fechaFin!, tratamiento['frecuenciaHoras'] as int);
+      // Añadir manualmente la primera dosis
+      String idMedicamento = tratamiento['idMedicamento'] as String;
+      String medicamentoName = await getMedicamentoName(idMedicamento);
+      final primeraDosis = {
+        'idTratamiento': tratamiento['idTratamiento'],
+        'hora': _fechaInicio!.millisecondsSinceEpoch,
+        'nombreMedicamento': medicamentoName,
+        'idUser': _auth.currentUser!.uid,
+        'dosis': tratamiento['dosis'],
+      };
+      await FirebaseFirestore.instance.collection('ProximosTratamientos').add(primeraDosis);
+  
+      List<DateTime> futureDoseTimes = getFutureDoseTimes(_fechaInicio!.add(Duration(hours: tratamiento['frecuenciaHoras'] as int)), _fechaFin!, tratamiento['frecuenciaHoras'] as int);
       for (DateTime doseTime in futureDoseTimes) {
-        String idMedicamento = tratamiento['idMedicamento'] as String;
         String medicamentoName = await getMedicamentoName(idMedicamento);
         final proximoTratamiento = {
           'idTratamiento': tratamiento['idTratamiento'],

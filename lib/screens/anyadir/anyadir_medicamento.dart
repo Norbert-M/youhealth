@@ -107,7 +107,8 @@ class _AnadirMedicamentoPageState extends State<AnadirMedicamentoPage> {
                       cantidadStock: int.parse(_cantidadStockController.text),
                       dosis: _dosisController.text,
                     );
-                    await FirebaseFirestore.instance.collection('medicamentos').doc(medicamento.idMedicamento).set(medicamento.toJson());
+                    await FirebaseFirestore.instance.collection('medicamentos').doc(medicamento.idMedicamento)
+                    .set(medicamento.toJson());
                     Navigator.pop(context);
                   }
                 },

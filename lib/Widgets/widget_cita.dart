@@ -19,17 +19,17 @@ class CitaCard extends StatelessWidget {
           children: <Widget>[
             Text(
               'Nombre de la cita: ${cita.tipoCita}',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'Fecha y hora: ${DateFormat('dd/MM/yyyy HH:mm').format(cita.fechaHoraCita)}',
-              style: TextStyle(fontSize: 16, color: Colors.white),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'Hospital: ${cita.direccionHospital}',
-              style: TextStyle(fontSize: 16, color: Colors.white),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
           ],
         ),

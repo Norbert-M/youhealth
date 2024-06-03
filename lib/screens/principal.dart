@@ -50,7 +50,7 @@ class _TreatmentListPageState extends State<PrincipalPage> {
               width: 200, // Ancho de la imagen
               height: 200, // Altura de la imagen
               child: Image.asset('lib/assets/app_icon.png', fit: BoxFit.cover),
-            ), // Asegúrate de reemplazar 'your_image.png' con la ruta de tu imagen
+            ), 
             const SizedBox(height: 50),
             ElevatedButton(
               style: ElevatedButton.styleFrom(

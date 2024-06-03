@@ -19,6 +19,8 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+
+
   void scheduleNotification(DateTime nextDose, String medicamentoName) async {
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
       'channel_ID',
@@ -32,13 +34,14 @@ class NotificationService {
     );
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0, // ID de la notificación
-      'Hora del tratamiento', // Título de la notificación
-      'Es hora de tomar $medicamentoName', // Cuerpo de la notificación
-      tz.TZDateTime.from(nextDose, tz.local), // Fecha y hora de la notificación
-      platformChannelSpecifics, // Detalles de la notificación
+      'Hora de tomar tu medicamento', // Título de la notificación
+      medicamentoName, // Cuerpo de la notificación
+      tz.TZDateTime.from(nextDose, tz.local), // Cuando mostrar la notificación
+      platformChannelSpecifics,
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
+      payload: 'Recuerda tu salud', // Aquí es donde proporcionas el payload
     );
   }
 }
